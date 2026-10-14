@@ -115,6 +115,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s;
+      margin-bottom: 8px;
     }
 
     .btn:hover {
@@ -124,7 +125,6 @@
     .btn-secondary {
       background: #e6dec9;
       color: var(--text);
-      margin-top: 8px;
     }
 
     .btn-secondary:hover {
@@ -302,7 +302,7 @@
   <div class="app-container">
     <header class="app-header">
       <h1>Hellcastle Horse Race Darts</h1>
-      <p>Tracks 1–10 • Unique Random Number Assignments • Live Arcade Board</p>
+      <p>Tracks 1–10 • Unique Random Number & Name Pool • Live Arcade Board</p>
     </header>
 
     <div class="winner-banner" id="winnerBanner">
@@ -334,6 +334,7 @@
           </select>
         </div>
         <button class="btn" id="addPlayerBtn">Add Player</button>
+        <button class="btn btn-secondary" id="randomizeNamesBtn">Randomize Horse Names</button>
         <button class="btn btn-secondary" id="clearPlayersBtn">Clear Players</button>
       </section>
 
@@ -390,6 +391,12 @@
       6: '#6f42c1', 7: '#e83e8c', 8: '#20c997', 9: '#fd7e14', 10: '#6610f2'
     };
 
+    const horseNamePool = [
+      "Hellfire Blitz", "Thunder Hooves", "Midnight Runner", "Bulls Eye", "Swanson", 
+      "BOOM", "Big Worm", "Holie", "Castle Roller", "Shadowfax", 
+      "Iron Stallion", "Dart Vadar", "Phantom Flyer", "Blazing Comet", "Silver Spur"
+    ];
+
     const state = {
       players: [],
       scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
@@ -398,24 +405,46 @@
       winner: null
     };
 
-    // Assign 2 unique random numbers between 1 and 20 to each of the 10 tracks without duplicates across the entire board
+    // Assign 2 unique random numbers between 1 and 20 to each track without duplicates
     function assignRandomNumbers() {
       let pool = [];
       for (let i = 1; i <= 20; i++) {
         pool.push(i);
       }
-      // Shuffle pool using Fisher-Yates
       for (let i = pool.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
       }
 
-      // Distribute 2 numbers per track
       for (let i = 1; i <= 10; i++) {
         let num1 = pool.pop();
         let num2 = pool.pop();
         state.assignedNumbers[i] = [num1, num2].sort((a, b) => a - b);
       }
+    }
+
+    // Automatically assign random unique names from the pool to all 10 tracks
+    function assignRandomHorseNames() {
+      // Shuffle the name pool
+      let shuffledNames = [...horseNamePool];
+      for (let i = shuffledNames.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+      }
+
+      state.players = [];
+      // Assign up to 10 unique random names to tracks 1-10
+      for (let i = 1; i <= 10; i++) {
+        state.players.push({
+          name: shuffledNames[i - 1],
+          horse: i
+        });
+      }
+      state.turnIndex = 0;
+      state.winner = null;
+      Object.keys(state.scores).forEach(k => state.scores[k] = 0);
+      document.getElementById('winnerBanner').style.display = 'none';
+      renderTracks();
     }
 
     function initGame() {
@@ -464,7 +493,6 @@
       if (state.winner) return;
       state.scores[track] = Math.max(0, Math.min(FINISH_HITS, state.scores[track] + delta));
       
-      // Check win condition
       if (state.scores[track] >= FINISH_HITS && !state.winner) {
         state.winner = track;
         const player = state.players.find(p => p.horse === track);
@@ -475,7 +503,6 @@
       renderTracks();
     }
 
-    // Bull Button Handler (+1 to all tracks)
     function handleBullHit() {
       if (state.winner) return;
       for (let i = 1; i <= 10; i++) {
@@ -549,6 +576,8 @@
         horseSelect.value = '';
         renderTracks();
       });
+
+      document.getElementById('randomizeNamesBtn').addEventListener('click', assignRandomHorseNames);
 
       document.getElementById('clearPlayersBtn').addEventListener('click', () => {
         if (confirm('Clear all players and reset scores?')) {
