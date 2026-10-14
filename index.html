@@ -423,29 +423,40 @@
       }
     }
 
-    // Automatically assign random unique names from the pool to all 10 tracks
-    function assignRandomHorseNames() {
-      // Shuffle the name pool
-      let shuffledNames = [...horseNamePool];
-      for (let i = shuffledNames.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
-      }
+   // Automatically assign random unique names to ONLY the unassigned/open tracks
+function assignRandomHorseNames() {
+  // Shuffle the name pool
+  let shuffledNames = [...horseNamePool];
+  for (let i = shuffledNames.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+  }
 
-      state.players = [];
-      // Assign up to 10 unique random names to tracks 1-10
-      for (let i = 1; i <= 10; i++) {
+  let nameIndex = 0;
+  // Loop through all tracks 1 to 10
+  for (let i = 1; i <= 10; i++) {
+    // Check if this track already has a player manually entered
+    const existingPlayer = state.players.find(p => p.horse === i);
+    
+    if (!existingPlayer) {
+      // Find the next available unused random name
+      while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
+        nameIndex++;
+      }
+      
+      if (nameIndex < shuffledNames.length) {
         state.players.push({
-          name: shuffledNames[i - 1],
+          name: shuffledNames[nameIndex],
           horse: i
         });
+        nameIndex++;
       }
-      state.turnIndex = 0;
-      state.winner = null;
-      Object.keys(state.scores).forEach(k => state.scores[k] = 0);
-      document.getElementById('winnerBanner').style.display = 'none';
-      renderTracks();
     }
+  }
+
+  state.winner = null;
+  renderTracks();
+}
 
     function initGame() {
       assignRandomNumbers();
