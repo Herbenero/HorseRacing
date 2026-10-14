@@ -1,692 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hellcastle Horse Race Darts</title>
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --panel: #fffbf5;
-      --panel-border: #e6dec9;
-      --text: #2c221e;
-      --subtle: #7a6b61;
-      --primary: #9c4a2f;
-      --primary-hover: #823c25;
-      --accent: #d48238;
-      --track-1: #d9534f;
-      --track-2: #f0ad4e;
-      --track-3: #5cb85c;
-      --track-4: #5bc0de;
-      --track-5: #0275d8;
-      --track-6: #6f42c1;
-      --track-7: #e83e8c;
-      --track-8: #20c997;
-      --track-9: #fd7e14;
-      --track-10: #6610f2;
-      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hellcastle Horse Race Darts</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
 
-    * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
 
-    body {
-      margin: 0;
-      padding: 20px;
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font-main);
-    }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    .app-container {
-      max-width: 1300px;
-      margin: 0 auto;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-    header.app-header {
-      margin-bottom: 24px;
-    }
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            color: var(--accent);
+        }
 
-    header.app-header h1 {
-      margin: 0 0 6px;
-      font-size: 1.8rem;
-      letter-spacing: -0.02em;
-    }
+        header p {
+            color: var(--text-muted);
+            margin: 0;
+        }
 
-    header.app-header p {
-      margin: 0;
-      color: var(--subtle);
-    }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
 
-    main.app-grid {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 24px;
-    }
+        @media (max-width: 900px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    @media (max-width: 900px) {
-      main.app-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(44, 34, 30, 0.03);
-    }
+        .panel h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
 
-    .setup-panel h2, .race-head h3, .side-stage h2 {
-      margin-top: 0;
-    }
+        .form-group {
+            margin-bottom: 1rem;
+        }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-      color: var(--subtle);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+        input, select, button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #0f172a;
+            color: var(--text-main);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
 
-    .form-control {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      background: #fff;
-      font-size: 0.95rem;
-      color: var(--text);
-    }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
 
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: var(--primary);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-      margin-bottom: 8px;
-    }
+        button {
+            background-color: var(--accent);
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+        }
 
-    .btn:hover {
-      background: var(--primary-hover);
-    }
+        button:hover {
+            background-color: var(--accent-hover);
+        }
 
-    .btn-secondary {
-      background: #e6dec9;
-      color: var(--text);
-    }
+        button.secondary {
+            background-color: #334155;
+            color: var(--text-main);
+        }
 
-    .btn-secondary:hover {
-      background: #d4cbaf;
-    }
+        button.secondary:hover {
+            background-color: #475569;
+        }
 
-    .dashboard {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 20px;
-    }
+        button.danger {
+            background-color: var(--danger);
+            color: white;
+        }
 
-    @media (max-width: 1050px) {
-      .dashboard {
-        grid-template-columns: 1fr;
-      }
-    }
+        /* Tracks View */
+        .tracks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
 
-    .race-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      border-bottom: 1px solid var(--panel-border);
-      padding-bottom: 12px;
-    }
+        .track-row {
+            display: grid;
+            grid-template-columns: 40px 140px 1fr 60px 140px;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            gap: 1rem;
+        }
 
-    .eyebrow {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--subtle);
-      font-weight: 700;
-    }
+        @media (max-width: 768px) {
+            .track-row {
+                grid-template-columns: 30px 100px 1fr 40px;
+            }
+            .track-actions {
+                display: none;
+            }
+        }
 
-    .tracks {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+        .track-number {
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-align: center;
+        }
 
-    .track-row {
-      display: flex;
-      align-items: center;
-      background: #fff;
-      border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      padding: 10px 14px;
-      gap: 12px;
-    }
+        .track-info .track-owner {
+            font-weight: bold;
+            font-size: 1rem;
+        }
 
-    .track-number {
-      font-weight: 700;
-      font-size: 1.1rem;
-      width: 24px;
-      text-align: center;
-    }
+        .track-info .assigned-nums {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
 
-    .track-info {
-      flex: 1;
-    }
+        .track-lane {
+            position: relative;
+            height: 24px;
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
 
-    .track-owner {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
+        .horse-icon {
+            position: absolute;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
 
-    .assigned-nums {
-      font-size: 0.8rem;
-      color: var(--accent);
-      font-weight: bold;
-    }
+        .track-score {
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
 
-    .track-lane {
-      flex: 3;
-      background: var(--bg);
-      height: 24px;
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--panel-border);
-    }
+        .track-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
 
-    .horse-icon {
-      position: absolute;
-      top: 2px;
-      left: 0;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      transition: left 0.3s ease;
-    }
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            margin: 0;
+        }
 
-    .track-score {
-      font-weight: 700;
-      width: 30px;
-      text-align: right;
-    }
+        /* Leaderboard & Turn info */
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    .track-actions {
-      display: flex;
-      gap: 6px;
-    }
+        .leaderboard-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-    .action-btn {
-      padding: 6px 10px;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      border: 1px solid var(--panel-border);
-      background: #fff;
-      cursor: pointer;
-    }
+        .winner-banner {
+            display: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
 
-    .action-btn:hover {
-      background: var(--bg);
-    }
-
-    .side-stage {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .scoreboard-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px dashed var(--panel-border);
-      font-size: 0.9rem;
-    }
-
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .control-btn {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--panel-border);
-      background: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .control-btn:hover {
-      background: var(--bg);
-    }
-
-    .control-btn.bull {
-      background: #8b0000;
-      color: #fff;
-      border-color: #600;
-    }
-    .control-btn.bull:hover {
-      background: #600;
-    }
-
-    .winner-banner {
-      display: none;
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .winner-banner img {
-      margin-top: 10px;
-      max-width: 120px;
-      height: auto;
-      border-radius: 8px;
-      border: 2px solid #155724;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  </style>
+        .winner-banner img {
+            max-width: 150px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>Hellcastle Horse Race Darts</h1>
+            <p>Tracks 1–10 • Unique Random Number & Name Pool • Live Arcade Board</p>
+        </header>
 
-  <div class="app-container">
-    <header class="app-header">
-      <h1>Hellcastle Horse Race Darts</h1>
-      <p>Tracks 1–10 • Unique Random Number & Name Pool • Live Arcade Board</p>
-    </header>
+        <div id="winnerBanner" class="winner-banner">
+            <h2 id="winnerTitle" style="margin:0; border:none;">We have a Winner!</h2>
+            <img id="winnerImage" src="" alt="Winning Horse">
+        </div>
 
-    <div class="winner-banner" id="winnerBanner">
-      <strong id="winnerTitle" style="display: block; font-size: 1.1rem;">We have a winner!</strong>
-      <img id="winnerImage" src="" alt="Winning Horse">
+        <div class="grid-layout">
+            <!-- Left Column: Controls & Setup -->
+            <div class="panel">
+                <h2>Game Setup</h2>
+                
+                <div class="form-group">
+                    <label for="raceLengthSelect">Race Length (Hits to Win)</label>
+                    <select id="raceLengthSelect">
+                        <option value="5">5 Hits (Sprint)</option>
+                        <option value="10" selected>10 Hits (Standard)</option>
+                        <option value="15">15 Hits (Long)</option>
+                        <option value="20">20 Hits (Marathon)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="playerName">Player Name</label>
+                    <input type="text" id="playerName" placeholder="Enter racer name...">
+                </div>
+
+                <div class="form-group">
+                    <label for="horseSelect">Assign Track / Horse</label>
+                    <select id="horseSelect">
+                        <option value="">Choose track (1-10)...</option>
+                        <option value="1">Lane 1</option>
+                        <option value="2">Lane 2</option>
+                        <option value="3">Lane 3</option>
+                        <option value="4">Lane 4</option>
+                        <option value="5">Lane 5</option>
+                        <option value="6">Lane 6</option>
+                        <option value="7">Lane 7</option>
+                        <option value="8">Lane 8</option>
+                        <option value="9">Lane 9</option>
+                        <option value="10">Lane 10</option>
+                    </select>
+                </div>
+
+                <button id="addPlayerBtn">Add Player</button>
+                <button id="randomizeNamesBtn" class="secondary">Randomize Horse Names</button>
+                <button id="clearPlayersBtn" class="danger">Clear Players</button>
+
+                <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+
+                <h2>Current Turn</h2>
+                <div id="currentTurnDisplay" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 1rem; color: var(--accent);">
+                    Loading...
+                </div>
+                <button id="nextTurnBtn" class="secondary">Next Turn &rarr;</button>
+                
+                <hr style="border-color: var(--border-color); margin: 1.5rem 0;">
+
+                <h2>Controls</h2>
+                <button id="checkWinnerBtn" class="secondary">Check Winner</button>
+                <button id="resetScoresBtn" class="danger">Reset Scores</button>
+                <button id="bullBtn" class="secondary">Bull (+1 All)</button>
+            </div>
+
+            <!-- Right Column: Track Board & Leaderboard -->
+            <div>
+                <div class="panel" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2 id="raceTracksTitle" style="margin:0; border:none;">Tracks 1–10</h2>
+                        <span id="activePlayersMeta" style="color: var(--text-muted); font-size: 0.875rem;">0 active horses</span>
+                    </div>
+                    <div id="tracks" class="tracks-container">
+                        <!-- Dynamically rendered track rows -->
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Leaderboard</h2>
+                    <ul id="leaderboardList" class="leaderboard-list">
+                        <!-- Dynamically rendered leaderboard -->
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <main class="app-grid">
-      <!-- Setup Column -->
-      <section class="panel setup-panel">
-        <h2>Game Setup</h2>
-        <div class="form-group">
-          <label for="raceLengthSelect">Race Length</label>
-          <select id="raceLengthSelect" class="form-control">
-            <option value="10">10 Lengths</option>
-            <option value="20">20 Lengths</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="playerName">Player Name</label>
-          <input type="text" id="playerName" class="form-control" placeholder="Enter racer name...">
-        </div>
-        <div class="form-group">
-          <label for="horseSelect">Assign Track / Horse</label>
-          <select id="horseSelect" class="form-control">
-            <option value="">Choose track (1-10)...</option>
-            <option value="1">Lane 1</option>
-            <option value="2">Lane 2</option>
-            <option value="3">Lane 3</option>
-            <option value="4">Lane 4</option>
-            <option value="5">Lane 5</option>
-            <option value="6">Lane 6</option>
-            <option value="7">Lane 7</option>
-            <option value="8">Lane 8</option>
-            <option value="9">Lane 9</option>
-            <option value="10">Lane 10</option>
-          </select>
-        </div>
-        <button class="btn" id="addPlayerBtn">Add Player</button>
-        <button class="btn btn-secondary" id="randomizeNamesBtn">Randomize Horse Names</button>
-        <button class="btn btn-secondary" id="clearPlayersBtn">Clear Players</button>
-      </section>
+    <script>
+        let FINISH_HITS = 10;
 
-      <!-- Dashboard Column -->
-      <div class="dashboard">
-        <!-- Race Board -->
-        <section class="panel race-panel">
-          <div class="race-head">
-            <div>
-              <div class="eyebrow">Race Board</div>
-              <h3 id="raceTracksTitle">Tracks 1–10 (10 Lengths)</h3>
-            </div>
-            <div class="race-meta">
-              <div><strong id="activePlayersMeta">0</strong> active horses</div>
-              <div><span id="turnMeta">No turn set</span></div>
-            </div>
-          </div>
-          <div id="tracks" class="tracks">
-            <!-- Dynamically populated tracks 1-10 -->
-          </div>
-        </section>
+        const trackColors = {
+            1: '#ef4444',
+            2: '#f97316',
+            3: '#f59e0b',
+            4: '#84cc16',
+            5: '#10b981',
+            6: '#06b6d4',
+            7: '#3b82f6',
+            8: '#6366f1',
+            9: '#a855f7',
+            10: '#ec4899'
+        };
 
-        <!-- Side Stage -->
-        <aside class="side-stage">
-          <section class="panel">
-            <div class="eyebrow">Leaderboard</div>
-            <div id="scoreboard" style="margin-top: 10px;">
-              <span style="color: var(--subtle); font-size: 0.9rem;">No racers yet.</span>
-            </div>
-          </section>
+        const horseNamePool = [
+            "Silver Spur", "Dart Vadar", "Herb", "Blazing Comet", "Kelly",
+            "Iron Stallion", "Castle Roller", "Bulls Eye", "Lord of the Reins",
+            "Royal Badass", "Thunder Hooves", "Midnight Run", "Wildfire",
+            "Golden Palomino", "Storm Chaser", "Phantom Stride"
+        ];
 
-          <section class="panel">
-            <div class="eyebrow">Current Turn</div>
-            <div id="currentTurnPlayer" style="font-weight: 700; font-size: 1.1rem; margin-top: 4px;">—</div>
-            <p id="currentTurnTrack" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--subtle);">Add players to begin.</p>
-          </section>
+        const horseImagePool = [
+            "hellcastle_horse_appaloosa.png",
+            "hellcastle_horse_bay.png",
+            "hellcastle_horse_blue_roan.png",
+            "hellcastle_horse_buckskin.png",
+            "hellcastle_horse_chestnut.png",
+            "hellcastle_horse_cremello.png",
+            "hellcastle_horse_dun.png",
+            "hellcastle_horse_gray.png",
+            "hellcastle_horse_leopard.png",
+            "hellcastle_horse_paint.png",
+            "hellcastle_horse_palomino.png",
+            "hellcastle_horse_roan.png",
+            "hellcastle_horse_skewbald.png",
+            "hellcastle_horse_smoky_black.png",
+            "hellcastle_horse_white.png",
+            "Horsey1.png"
+        ];
 
-          <section class="controls">
-            <button class="control-btn" id="nextTurnBtn">Next Turn →</button>
-            <button class="control-btn" id="checkWinnerBtn">Check Winner</button>
-            <button class="control-btn" id="resetScoresBtn">Reset Scores</button>
-            <button class="control-btn bull" id="bullBtn">Bull (+1 All)</button>
-          </section>
-        </aside>
-      </div>
-    </main>
-  </div>
+        let state = {
+            players: [
+                { name: "Silver Spur", horse: 1 },
+                { name: "Dart Vadar", horse: 2 },
+                { name: "Herb", horse: 3 },
+                { name: "Blazing Comet", horse: 4 },
+                { name: "Kelly", horse: 5 },
+                { name: "Iron Stallion", horse: 6 },
+                { name: "Castle Roller", horse: 7 },
+                { name: "Bulls Eye", horse: 8 },
+                { name: "Lord of the Reins", horse: 9 },
+                { name: "Royal Badass", horse: 10 }
+            ],
+            scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
+            assignedNumbers: {},
+            turnIndex: 0,
+            winner: null
+        };
 
-  <script>
-    let FINISH_HITS = 10;
-    
-    const trackColors = {
-      1: '#d9534f', 2: '#f0ad4e', 3: '#5cb85c', 4: '#5bc0de', 5: '#0275d8',
-      6: '#6f42c1', 7: '#e83e8c', 8: '#20c997', 9: '#fd7e14', 10: '#6610f2'
-    };
+        function assignRandomNumbers() {
+            const numbers = Array.from({ length: 20 }, (_, i) => i + 1).concat([25, 50]);
+            // Shuffle
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
 
-    const horseNamePool = [
-      "Hellfire Blitz", "Thunder Hooves", "Midnight Runner", "Bulls Eye", "Hi Bob", 
-      "The Queen's Getaway", "Papal Sidekick", "Long Live the Bitch", "Castle Roller", "Shadowfax", 
-      "Iron Stallion", "Dart Vadar", "Phantom Flyer", "Blazing Comet", "Silver Spur", 
-      "Lord of the Reins", "Hell to the Neigh", "Hoof and Order", "Royal Badass", "Diplomatic Immunity"
-    ];
+            state.assignedNumbers = {};
+            for (let i = 1; i <= 10; i++) {
+                state.assignedNumbers[i] = [numbers[(i - 1) * 2], numbers[(i - 1) * 2 + 1]];
+            }
+        }
 
-    const horseImagePool = [
-      "Horsey1.png",
-      "hellcastle_horse_appaloosa.png",
-      "hellcastle_horse_bay.png",
-      "hellcastle_horse_blue_roan.png",
-      "hellcastle_horse_buckskin.png",
-      "hellcastle_horse_chestnut.png",
-      "hellcastle_horse_cremello.png",
-      "hellcastle_horse_dun.png",
-      "hellcastle_horse_gray.png",
-      "hellcastle_horse_leopard.png",
-      "hellcastle_horse_paint.png",
-      "hellcastle_horse_palomino.png",
-      "hellcastle_horse_roan.png",
-      "hellcastle_horse_skewbald.png",
-      "hellcastle_horse_smoky_black.png",
-      "hellcastle_horse_white.png"
-    ];
+        function assignRandomHorseNames() {
+            let shuffledNames = [...horseNamePool];
+            for (let i = shuffledNames.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+            }
+            
+            let nameIndex = 0;
+            for (let i = 1; i <= 10; i++) {
+                const existingPlayer = state.players.find(p => p.horse === i);
+                if (!existingPlayer) {
+                    while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
+                        nameIndex++;
+                    }
+                    if (nameIndex < shuffledNames.length) {
+                        state.players.push({ name: shuffledNames[nameIndex], horse: i });
+                        nameIndex++;
+                    }
+                } else {
+                    existingPlayer.name = shuffledNames[nameIndex++];
+                }
+            }
+            state.winner = null;
+            renderTracks();
+        }
 
-    const state = {
-      players: [],
-      scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
-      assignedNumbers: {},
-      turnIndex: 0,
-      winner: null
-    };
+        function declareWinner(trackNum, reasonText = "wins the race!") {
+            if (state.winner) return;
+            state.winner = trackNum;
+            const player = state.players.find(p => p.horse === trackNum);
+            const winnerName = player ? `Track ${trackNum} (${player.name})` : `Track ${trackNum}`;
+            document.getElementById('winnerTitle').innerText = `${winnerName} ${reasonText}`;
+            const randomImg = horseImagePool[Math.floor(Math.random() * horseImagePool.length)];
+            document.getElementById('winnerImage').src = randomImg;
+            document.getElementById('winnerBanner').style.display = 'block';
+        }
 
-    function assignRandomNumbers() {
-      let pool = [];
-      for (let i = 1; i <= 20; i++) {
-        pool.push(i);
-      }
-      for (let i = pool.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      for (let i = 1; i <= 10; i++) {
-        let num1 = pool.pop();
-        let num2 = pool.pop();
-        state.assignedNumbers[i] = [num1, num2].sort((a, b) => a - b);
-      }
-    }
+        function renderTracks() {
+            const container = document.getElementById('tracks');
+            container.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const player = state.players.find(p => p.horse === i);
+                const ownerName = player ? player.name : 'Open Lane';
+                const score = state.scores[i];
+                const progressPercent = Math.min(100, (score / FINISH_HITS) * 100);
+                const nums = state.assignedNumbers[i] ? state.assignedNumbers[i].join(', ') : '';
+                
+                const row = document.createElement('div');
+                row.className = 'track-row';
+                row.innerHTML = `
+                    <div class="track-number" style="color: ${trackColors[i]}">${i}</div>
+                    <div class="track-info">
+                        <div class="track-owner">${ownerName}</div>
+                        <div class="assigned-nums">Nums: [${nums}]</div>
+                    </div>
+                    <div class="track-lane">
+                        <div class="horse-icon" style="left: ${progressPercent}%; background: ${trackColors[i]}"></div>
+                    </div>
+                    <div class="track-score">${score}</div>
+                    <div class="track-actions">
+                        <button class="action-btn" onclick="adjustScore(${i}, 1)">Hit +1</button>
+                        <button class="action-btn secondary" onclick="adjustScore(${i}, -1)">Undo</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+            document.getElementById('activePlayersMeta').innerText = `${state.players.length} active horses`;
+            document.getElementById('raceTracksTitle').innerText = `Tracks 1–10 (${FINISH_HITS} Lengths)`;
+            renderLeaderboard();
+            renderTurn();
+        }
 
-    function checkFullLanesAndPickStarter() {
-      if (state.players.length === 10 && state.turnIndex === 0) {
-        state.turnIndex = Math.floor(Math.random() * state.players.length);
-      }
-    }
+        function adjustScore(track, delta) {
+            if (state.winner) return;
+            state.scores[track] = Math.max(0, Math.min(FINISH_HITS, state.scores[track] + delta));
+            if (state.scores[track] >= FINISH_HITS && !state.winner) {
+                declareWinner(track);
+            }
+            renderTracks();
+        }
 
-    function assignRandomHorseNames() {
-      let shuffledNames = [...horseNamePool];
-      for (let i = shuffledNames.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
-      }
-
-      let nameIndex = 0;
-      for (let i = 1; i <= 10; i++) {
-        const existingPlayer = state.players.find(p => p.horse === i);
-        if (!existingPlayer) {
-          while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
-            nameIndex++;
-          }
-          if (nameIndex < shuffledNames.length) {
-            state.players.push({
-              name: shuffledNames[nameIndex],
-              horse: i
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
+            
+            const sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
+            sorted.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>#${p.horse} ${p.name}</span> <strong>${state.scores[p.horse]} pts</strong>`;
+                list.appendChild(li);
             });
-            nameIndex++;
-          }
-        }
-      }
-      state.winner = null;
-      checkFullLanesAndPickStarter();
-      renderTracks();
-    }
-
-    function declareWinner(trackNum, reasonText = "wins the race!") {
-      if (state.winner) return;
-      state.winner = trackNum;
-
-      const player = state.players.find(p => p.horse === trackNum);
-      const winnerName = player ? `Track ${trackNum} (${player.name})` : `Track ${trackNum}`;
-      
-      document.getElementById('winnerTitle').innerText = `${winnerName} ${reasonText}`;
-      
-      const randomImg = horseImagePool[Math.floor(Math.random() * horseImagePool.length)];
-      document.getElementById('winnerImage').src = randomImg;
-
-      document.getElementById('winnerBanner').style.display = 'block';
-    }
-
-    function initGame() {
-      assignRandomNumbers();
-      renderTracks();
-      setupEventListeners();
-    }
-
-    function renderTracks() {
-      const container = document.getElementById('tracks');
-      container.innerHTML = '';
-
-      for (let i = 1; i <= 10; i++) {
-        const player = state.players.find(p => p.horse === i);
-        const ownerName = player ? player.name : 'Open Lane';
-        const score = state.scores[i];
-        const progressPercent = Math.min(100, (score / FINISH_HITS) * 100);
-        const nums = state.assignedNumbers[i] ? state.assignedNumbers[i].join(', ') : '';
-
-        const row = document.createElement('div');
-        row.className = 'track-row';
-        row.innerHTML = `
-          <div class="track-number" style="color: ${trackColors[i]}">${i}</div>
-          <div class="track-info">
-            <div class="track-owner">${ownerName}</div>
-            <div class="assigned-nums">Nums: [${nums}]</div>
-          </div>
-          <div class="track-lane">
-            <div class="horse-icon" style="left: ${progressPercent}%; background: ${trackColors[i]}"></div>
-          </div>
-          <div class="track-score">${score}</div>
-          <div class="track-actions">
-            <button class="action-btn" onclick="adjustScore(${i}, 1)">Hit +1</button>
-            <button class="action-btn" onclick="adjustScore(${i}, -1)">Undo</button>
-          </div>
-        `;
-        container.appendChild(row);
-      }
-
-      document.getElementById('activePlayersMeta').innerText = state.players.length;
-      document.getElementById('raceTracksTitle').innerText = `Tracks 1–10 (${FINISH_HITS} Lengths)`;
-      renderLeaderboard();
-      renderTurn();
-    }
-
-    function adjustScore(track, delta) {
-      if (state.winner) return;
-      state.scores[track] = Math.max(0, Math.min(FINISH_HITS, state.scores[track] + delta));
-      
-      if (state.scores[track] >= FINISH_HITS && !state.winner) {
-        declareWinner(track, "wins the race!");
-      }
-      renderTracks();
-    }
-
-    function handleBullHit() {
-      if (state.winner) return;
-      for (let i = 1; i <= 10; i++) {
-        if (state.scores[i] < FINISH_HITS) {
-          state.scores[i] += 1;
-          if (state.scores[i] >= FINISH_HITS && !state.winner) {
-            declareWinner(i, "wins the race via Bull!");
-            break;
-          }
-        }
-      }
-      renderTracks();
-    }
-
-    function renderLeaderboard() {
-      const board = document.getElementById('scoreboard');
-      if (state.players.length === 0) {
-        board.innerHTML = '<span style="color: var(--subtle); font-size: 0.9rem;">No racers yet.</span>';
-        return;
-      }
-
-      let sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
-      board.innerHTML = sorted.map((p, index) => `
-        <div class="scoreboard-item">
-          <span><strong>#${index + 1}</strong> <strong style="color: ${trackColors[p.horse]}">#${p.horse}</strong> ${p.name}</span>
-          <span><strong>${state.scores[p.horse]}</strong> pts</span>
-        </div>
-      `).join('');
-    }
-
-    function renderTurn() {
-      const turnPlayerEl = document.getElementById('currentTurnPlayer');
-      const turnTrackEl = document.getElementById('currentTurnTrack');
-      const turnMeta = document.getElementById('turnMeta');
-
-      if (state.players.length === 0) {
-        turnPlayerEl.innerText = '—';
-        turnTrackEl.innerText = 'Add players to begin.';
-        turnMeta.innerText = 'No turn set';
-        return;
-      }
-
-      const current = state.players[state.turnIndex % state.players.length];
-      turnPlayerEl.innerText = current.name;
-      turnTrackEl.innerText = `Riding Track #${current.horse} (Numbers: ${state.assignedNumbers[current.horse].join(', ')})`;
-      turnMeta.innerText = `Turn: ${current.name}`;
-    }
-
-    function setupEventListeners() {
-      document.getElementById('raceLengthSelect').addEventListener('change', (e) => {
-        FINISH_HITS = parseInt(e.target.value);
-        renderTracks();
-      });
-
-      document.getElementById('addPlayerBtn').addEventListener('click', () => {
-        const nameInput = document.getElementById('playerName');
-        const horseSelect = document.getElementById('horseSelect');
-        const name = nameInput.value.trim();
-        const horse = parseInt(horseSelect.value);
-
-        if (!name || isNaN(horse)) {
-          alert('Please enter a player name and select a valid track (1-10).');
-          return;
         }
 
-        if (state.players.some(p => p.horse === horse)) {
-          alert('This track is already taken by another player.');
-          return;
+        function renderTurn() {
+            const display = document.getElementById('currentTurnDisplay');
+            if (state.players.length === 0) {
+                display.innerText = "No players added.";
+                return;
+            }
+            const currentPlayer = state.players[state.turnIndex % state.players.length];
+            const nums = state.assignedNumbers[currentPlayer.horse] ? state.assignedNumbers[currentPlayer.horse].join(', ') : '';
+            display.innerHTML = `${currentPlayer.name}<br><span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${nums})</span>`;
         }
 
-        state.players.push({ name, horse });
-        nameInput.value = '';
-        horseSelect.value = '';
-        
-        checkFullLanesAndPickStarter();
-        renderTracks();
-      });
-
-      document.getElementById('randomizeNamesBtn').addEventListener('click', assignRandomHorseNames);
-
-      document.getElementById('clearPlayersBtn').addEventListener('click', () => {
-        if (confirm('Clear all players and reset scores?')) {
-          state.players = [];
-          state.winner = null;
-          state.turnIndex = 0;
-          Object.keys(state.scores).forEach(k => state.scores[k] = 0);
-          document.getElementById('winnerBanner').style.display = 'none';
-          assignRandomNumbers();
-          renderTracks();
+        function handleBullHit() {
+            if (state.winner) return;
+            for (let i = 1; i <= 10; i++) {
+                state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
+                if (state.scores[i] >= FINISH_HITS && !state.winner) {
+                    declareWinner(i);
+                }
+            }
+            renderTracks();
         }
-      });
 
-      document.getElementById('nextTurnBtn').addEventListener('click', () => {
-        if (state.players.length > 0) {
-          state.turnIndex++;
-          renderTurn();
+        function setupEventListeners() {
+            document.getElementById('raceLengthSelect').addEventListener('change', (e) => {
+                FINISH_HITS = parseInt(e.target.value);
+                renderTracks();
+            });
+
+            document.getElementById('addPlayerBtn').addEventListener('click', () => {
+                const nameInput = document.getElementById('playerName');
+                const horseSelect = document.getElementById('horseSelect');
+                const name = nameInput.value.trim();
+                const horse = parseInt(horseSelect.value);
+
+                if (!name || isNaN(horse)) {
+                    alert('Please enter a player name and select a valid track (1-10).');
+                    return;
+                }
+
+                if (state.players.some(p => p.horse === horse)) {
+                    alert('This track is already taken by another player.');
+                    return;
+                }
+
+                state.players.push({ name, horse });
+                nameInput.value = '';
+                horseSelect.value = '';
+                renderTracks();
+            });
+
+            document.getElementById('randomizeNamesBtn').addEventListener('click', assignRandomHorseNames);
+
+            document.getElementById('clearPlayersBtn').addEventListener('click', () => {
+                if (confirm('Clear all players and reset scores?')) {
+                    state.players = [];
+                    state.winner = null;
+                    state.turnIndex = 0;
+                    Object.keys(state.scores).forEach(k => state.scores[k] = 0);
+                    document.getElementById('winnerBanner').style.display = 'none';
+                    assignRandomNumbers();
+                    renderTracks();
+                }
+            });
+
+            document.getElementById('nextTurnBtn').addEventListener('click', () => {
+                if (state.players.length > 0) {
+                    state.turnIndex++;
+                    renderTurn();
+                }
+            });
+
+            document.getElementById('checkWinnerBtn').addEventListener('click', () => {
+                let maxScore = -1;
+                let leader = null;
+                for (let i = 1; i <= 10; i++) {
+                    if (state.scores[i] > maxScore) {
+                        maxScore = state.scores[i];
+                        leader = i;
+                    }
+                }
+                alert(`Current leader is Track #${leader} with ${maxScore} hits!`);
+            });
+
+            document.getElementById('resetScoresBtn').addEventListener('click', () => {
+                if (confirm('Reset all scores and re-assign random numbers?')) {
+                    Object.keys(state.scores).forEach(k => state.scores[k] = 0);
+                    state.winner = null;
+                    document.getElementById('winnerBanner').style.display = 'none';
+                    assignRandomNumbers();
+                    renderTracks();
+                }
+            });
+
+            document.getElementById('bullBtn').addEventListener('click', handleBullHit);
         }
-      });
 
-      document.getElementById('checkWinnerBtn').addEventListener('click', () => {
-        let maxScore = -1;
-        let leader = null;
-        for (let i = 1; i <= 10; i++) {
-          if (state.scores[i] > maxScore) {
-            maxScore = state.scores[i];
-            leader = i;
-          }
-        }
-        alert(`Current leader is Track #${leader} with ${maxScore} hits!`);
-      });
-
-      document.getElementById('resetScoresBtn').addEventListener('click', () => {
-        if (confirm('Reset all scores and re-assign random numbers?')) {
-          Object.keys(state.scores).forEach(k => state.scores[k] = 0);
-          state.winner = null;
-          document.getElementById('winnerBanner').style.display = 'none';
-          assignRandomNumbers();
-          renderTracks();
-        }
-      });
-
-      document.getElementById('bullBtn').addEventListener('click', handleBullHit);
-    }
-
-    window.onload = initGame;
-  </script>
+        // Initialize App on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            assignRandomNumbers();
+            renderTracks();
+            setupEventListeners();
+        });
+    </script>
 </body>
 </html>
