@@ -905,6 +905,8 @@
             <button class="control-btn next" id="nextTurnBtn">Next Turn →</button>
             <button class="control-btn win" id="declareWinnerBtn">Check Winner</button>
             <button class="control-btn reset" id="resetGameBtn">Reset Scores</button>
+            <button id="resetScoresBtn" class="btn-secondary">Reset Scores</button>
+<button id="bullBtn" class="btn-bull" onclick="hitBull()">Bull (+1 All)</button>
           </section>
         </aside>
       </section>
@@ -1074,8 +1076,7 @@ function hitBull() {
       state.turnIndex = 0;
       render();
     }
-<button id="resetScoresBtn" class="btn-secondary">Reset Scores</button>
-<button id="bullBtn" class="btn-bull" onclick="hitBull()">Bull (+1 All)</button>
+
     function clearPlayers() {
       state.players = [];
       state.turnIndex = 0;
