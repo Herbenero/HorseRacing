@@ -380,46 +380,35 @@
             winner: null
         };
 
-       function assignRandomHorseNames() {
-    numbersRevealed = true; // Reveal target numbers once randomize is clicked
-    let shuffledNames = [...horseNamePool];
-    
-    // Filter out names already taken by manually added players
-    const existingNames = new Set(state.players.map(p => p.name));
-    shuffledNames = shuffledNames.filter(name => !existingNames.has(name));
+        function assignRandomNumbers() {
+            const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
 
-    // Shuffle the remaining available names
-    for (let i = shuffledNames.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
-    }
-    
-    let nameIndex = 0;
-    // Loop through lanes 1 to 10; only assign a random name if the lane doesn't have a player yet
-    for (let i = 1; i <= 10; i++) {
-        const hasPlayer = state.players.some(p => p.horse === i);
-        if (!hasPlayer && nameIndex < shuffledNames.length) {
-            state.players.push({ name: shuffledNames[nameIndex], horse: i });
-            nameIndex++;
+            state.assignedNumbers = {};
+            for (let i = 1; i <= 10; i++) {
+                state.assignedNumbers[i] = [numbers[(i - 1) * 2], numbers[(i - 1) * 2 + 1]];
+            }
         }
-    }
-    
-    state.winner = null;
-    renderTracks();
-}
 
         function assignRandomHorseNames() {
-            numbersRevealed = true; // Reveal target numbers once randomize is clicked
+            numbersRevealed = true;
             let shuffledNames = [...horseNamePool];
+            
+            const existingNames = new Set(state.players.map(p => p.name));
+            shuffledNames = shuffledNames.filter(name => !existingNames.has(name));
+
             for (let i = shuffledNames.length - 1; i > 0; i--) {
                 let j = Math.floor(Math.random() * (i + 1));
                 [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
             }
             
-            state.players = [];
             let nameIndex = 0;
             for (let i = 1; i <= 10; i++) {
-                if (nameIndex < shuffledNames.length) {
+                const hasPlayer = state.players.some(p => p.horse === i);
+                if (!hasPlayer && nameIndex < shuffledNames.length) {
                     state.players.push({ name: shuffledNames[nameIndex], horse: i });
                     nameIndex++;
                 }
