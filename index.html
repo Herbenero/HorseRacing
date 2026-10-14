@@ -302,7 +302,7 @@
   <div class="app-container">
     <header class="app-header">
       <h1>Hellcastle Horse Race Darts</h1>
-      <p>Tracks 1–10 • Random Number Assignments • Live Arcade Board</p>
+      <p>Tracks 1–10 • Unique Random Number Assignments • Live Arcade Board</p>
     </header>
 
     <div class="winner-banner" id="winnerBanner">
@@ -398,15 +398,23 @@
       winner: null
     };
 
-    // Assign 2 unique random numbers between 1 and 20 for all 10 tracks
+    // Assign 2 unique random numbers between 1 and 20 to each of the 10 tracks without duplicates across the entire board
     function assignRandomNumbers() {
+      let pool = [];
+      for (let i = 1; i <= 20; i++) {
+        pool.push(i);
+      }
+      // Shuffle pool using Fisher-Yates
+      for (let i = pool.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+
+      // Distribute 2 numbers per track
       for (let i = 1; i <= 10; i++) {
-        let nums = [];
-        while (nums.length < 2) {
-          let r = Math.floor(Math.random() * 20) + 1;
-          if (!nums.includes(r)) nums.push(r);
-        }
-        state.assignedNumbers[i] = nums;
+        let num1 = pool.pop();
+        let num2 = pool.pop();
+        state.assignedNumbers[i] = [num1, num2].sort((a, b) => a - b);
       }
     }
 
@@ -459,7 +467,7 @@
       // Check win condition
       if (state.scores[track] >= FINISH_HITS && !state.winner) {
         state.winner = track;
-        const player = state.players.find(p => p.name);
+        const player = state.players.find(p => p.horse === track);
         const winnerName = player ? `Track ${track} (${player.name})` : `Track ${track}`;
         document.getElementById('winnerTitle').innerText = `${winnerName} wins the race!`;
         document.getElementById('winnerBanner').style.display = 'block';
@@ -475,7 +483,9 @@
           state.scores[i] += 1;
           if (state.scores[i] >= FINISH_HITS && !state.winner) {
             state.winner = i;
-            document.getElementById('winnerTitle').innerText = `Track ${i} wins the race via Bull!`;
+            const player = state.players.find(p => p.horse === i);
+            const winnerName = player ? `Track ${i} (${player.name})` : `Track ${i}`;
+            document.getElementById('winnerTitle').innerText = `${winnerName} wins the race via Bull!`;
             document.getElementById('winnerBanner').style.display = 'block';
           }
         }
