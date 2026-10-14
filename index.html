@@ -288,12 +288,23 @@
     .winner-banner {
       display: none;
       background: #d4edda;
-      border-color: #c3e6cb;
+      border: 1px solid #c3e6cb;
       color: #155724;
       padding: 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 20px;
       text-align: center;
+    }
+
+    .winner-banner img {
+      margin-top: 10px;
+      max-width: 120px;
+      height: auto;
+      border-radius: 8px;
+      border: 2px solid #155724;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
@@ -306,7 +317,8 @@
     </header>
 
     <div class="winner-banner" id="winnerBanner">
-      <strong id="winnerTitle">We have a winner!</strong>
+      <strong id="winnerTitle" style="display: block; font-size: 1.1rem;">We have a winner!</strong>
+      <img id="winnerImage" src="" alt="Winning Horse">
     </div>
 
     <main class="app-grid">
@@ -394,8 +406,27 @@
     const horseNamePool = [
       "Hellfire Blitz", "Thunder Hooves", "Midnight Runner", "Bulls Eye", "Hi Bob", 
       "The Queen's Getaway", "Papal Sidekick", "Long Live the Bitch", "Castle Roller", "Shadowfax", 
-      "Iron Stallion", "Dart Vadar", "Phantom Flyer", "Blazing Comet", "Silver Spur",
-      "Lord of the Reins", "Hell to the Neigh", "Hoof and Order", "Royal Badass", "Diplomatic Immunity",
+      "Iron Stallion", "Dart Vadar", "Phantom Flyer", "Blazing Comet", "Silver Spur", 
+      "Lord of the Reins", "Hell to the Neigh", "Hoof and Order", "Royal Badass", "Diplomatic Immunity"
+    ];
+
+    const horseImagePool = [
+      "Horsey1.png",
+      "hellcastle_horse_appaloosa.png",
+      "hellcastle_horse_bay.png",
+      "hellcastle_horse_blue_roan.png",
+      "hellcastle_horse_buckskin.png",
+      "hellcastle_horse_chestnut.png",
+      "hellcastle_horse_cremello.png",
+      "hellcastle_horse_dun.png",
+      "hellcastle_horse_gray.png",
+      "hellcastle_horse_leopard.png",
+      "hellcastle_horse_paint.png",
+      "hellcastle_horse_palomino.png",
+      "hellcastle_horse_roan.png",
+      "hellcastle_horse_skewbald.png",
+      "hellcastle_horse_smoky_black.png",
+      "hellcastle_horse_white.png"
     ];
 
     const state = {
@@ -416,7 +447,6 @@
         let j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
       }
-
       for (let i = 1; i <= 10; i++) {
         let num1 = pool.pop();
         let num2 = pool.pop();
@@ -424,40 +454,49 @@
       }
     }
 
-   // Automatically assign random unique names to ONLY the unassigned/open tracks
-function assignRandomHorseNames() {
-  // Shuffle the name pool
-  let shuffledNames = [...horseNamePool];
-  for (let i = shuffledNames.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
-  }
+    // Automatically assign random unique names to ONLY the unassigned/open tracks
+    function assignRandomHorseNames() {
+      let shuffledNames = [...horseNamePool];
+      for (let i = shuffledNames.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+      }
 
-  let nameIndex = 0;
-  // Loop through all tracks 1 to 10
-  for (let i = 1; i <= 10; i++) {
-    // Check if this track already has a player manually entered
-    const existingPlayer = state.players.find(p => p.horse === i);
-    
-    if (!existingPlayer) {
-      // Find the next available unused random name
-      while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
-        nameIndex++;
+      let nameIndex = 0;
+      for (let i = 1; i <= 10; i++) {
+        const existingPlayer = state.players.find(p => p.horse === i);
+        if (!existingPlayer) {
+          while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
+            nameIndex++;
+          }
+          if (nameIndex < shuffledNames.length) {
+            state.players.push({
+              name: shuffledNames[nameIndex],
+              horse: i
+            });
+            nameIndex++;
+          }
+        }
       }
-      
-      if (nameIndex < shuffledNames.length) {
-        state.players.push({
-          name: shuffledNames[nameIndex],
-          horse: i
-        });
-        nameIndex++;
-      }
+      state.winner = null;
+      renderTracks();
     }
-  }
 
-  state.winner = null;
-  renderTracks();
-}
+    function declareWinner(trackNum, reasonText = "wins the race!") {
+      if (state.winner) return;
+      state.winner = trackNum;
+
+      const player = state.players.find(p => p.horse === trackNum);
+      const winnerName = player ? `Track ${trackNum} (${player.name})` : `Track ${trackNum}`;
+      
+      document.getElementById('winnerTitle').innerText = `${winnerName} ${reasonText}`;
+      
+      // Select a random image from the repository pool
+      const randomImg = horseImagePool[Math.floor(Math.random() * horseImagePool.length)];
+      document.getElementById('winnerImage').src = randomImg;
+
+      document.getElementById('winnerBanner').style.display = 'block';
+    }
 
     function initGame() {
       assignRandomNumbers();
@@ -506,11 +545,7 @@ function assignRandomHorseNames() {
       state.scores[track] = Math.max(0, Math.min(FINISH_HITS, state.scores[track] + delta));
       
       if (state.scores[track] >= FINISH_HITS && !state.winner) {
-        state.winner = track;
-        const player = state.players.find(p => p.horse === track);
-        const winnerName = player ? `Track ${track} (${player.name})` : `Track ${track}`;
-        document.getElementById('winnerTitle').innerText = `${winnerName} wins the race!`;
-        document.getElementById('winnerBanner').style.display = 'block';
+        declareWinner(track, "wins the race!");
       }
       renderTracks();
     }
@@ -521,11 +556,8 @@ function assignRandomHorseNames() {
         if (state.scores[i] < FINISH_HITS) {
           state.scores[i] += 1;
           if (state.scores[i] >= FINISH_HITS && !state.winner) {
-            state.winner = i;
-            const player = state.players.find(p => p.horse === i);
-            const winnerName = player ? `Track ${i} (${player.name})` : `Track ${i}`;
-            document.getElementById('winnerTitle').innerText = `${winnerName} wins the race via Bull!`;
-            document.getElementById('winnerBanner').style.display = 'block';
+            declareWinner(i, "wins the race via Bull!");
+            break;
           }
         }
       }
