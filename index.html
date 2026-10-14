@@ -326,6 +326,13 @@
       <section class="panel setup-panel">
         <h2>Game Setup</h2>
         <div class="form-group">
+          <label for="raceLengthSelect">Race Length</label>
+          <select id="raceLengthSelect" class="form-control">
+            <option value="10">10 Lengths</option>
+            <option value="20">20 Lengths</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label for="playerName">Player Name</label>
           <input type="text" id="playerName" class="form-control" placeholder="Enter racer name...">
         </div>
@@ -357,7 +364,7 @@
           <div class="race-head">
             <div>
               <div class="eyebrow">Race Board</div>
-              <h3>Tracks 1–10</h3>
+              <h3 id="raceTracksTitle">Tracks 1–10 (10 Lengths)</h3>
             </div>
             <div class="race-meta">
               <div><strong id="activePlayersMeta">0</strong> active horses</div>
@@ -396,7 +403,7 @@
   </div>
 
   <script>
-    const FINISH_HITS = 10;
+    let FINISH_HITS = 10;
     
     const trackColors = {
       1: '#d9534f', 2: '#f0ad4e', 3: '#5cb85c', 4: '#5bc0de', 5: '#0275d8',
@@ -437,7 +444,6 @@
       winner: null
     };
 
-    // Assign 2 unique random numbers between 1 and 20 to each track without duplicates
     function assignRandomNumbers() {
       let pool = [];
       for (let i = 1; i <= 20; i++) {
@@ -454,7 +460,12 @@
       }
     }
 
-    // Automatically assign random unique names to ONLY the unassigned/open tracks
+    function checkFullLanesAndPickStarter() {
+      if (state.players.length === 10 && state.turnIndex === 0) {
+        state.turnIndex = Math.floor(Math.random() * state.players.length);
+      }
+    }
+
     function assignRandomHorseNames() {
       let shuffledNames = [...horseNamePool];
       for (let i = shuffledNames.length - 1; i > 0; i--) {
@@ -479,6 +490,7 @@
         }
       }
       state.winner = null;
+      checkFullLanesAndPickStarter();
       renderTracks();
     }
 
@@ -491,7 +503,6 @@
       
       document.getElementById('winnerTitle').innerText = `${winnerName} ${reasonText}`;
       
-      // Select a random image from the repository pool
       const randomImg = horseImagePool[Math.floor(Math.random() * horseImagePool.length)];
       document.getElementById('winnerImage').src = randomImg;
 
@@ -536,6 +547,7 @@
       }
 
       document.getElementById('activePlayersMeta').innerText = state.players.length;
+      document.getElementById('raceTracksTitle').innerText = `Tracks 1–10 (${FINISH_HITS} Lengths)`;
       renderLeaderboard();
       renderTurn();
     }
@@ -572,9 +584,9 @@
       }
 
       let sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
-      board.innerHTML = sorted.map(p => `
+      board.innerHTML = sorted.map((p, index) => `
         <div class="scoreboard-item">
-          <span><strong style="color: ${trackColors[p.horse]}">#${p.horse}</strong> ${p.name}</span>
+          <span><strong>#${index + 1}</strong> <strong style="color: ${trackColors[p.horse]}">#${p.horse}</strong> ${p.name}</span>
           <span><strong>${state.scores[p.horse]}</strong> pts</span>
         </div>
       `).join('');
@@ -599,6 +611,11 @@
     }
 
     function setupEventListeners() {
+      document.getElementById('raceLengthSelect').addEventListener('change', (e) => {
+        FINISH_HITS = parseInt(e.target.value);
+        renderTracks();
+      });
+
       document.getElementById('addPlayerBtn').addEventListener('click', () => {
         const nameInput = document.getElementById('playerName');
         const horseSelect = document.getElementById('horseSelect');
@@ -618,6 +635,8 @@
         state.players.push({ name, horse });
         nameInput.value = '';
         horseSelect.value = '';
+        
+        checkFullLanesAndPickStarter();
         renderTracks();
       });
 
