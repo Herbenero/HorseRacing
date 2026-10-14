@@ -331,6 +331,7 @@
 
     <script>
         let FINISH_HITS = 10;
+        let numbersRevealed = false;
 
         const trackColors = {
             1: '#ef4444',
@@ -405,6 +406,7 @@
         }
 
         function assignRandomHorseNames() {
+            numbersRevealed = true; // Reveal target numbers once randomize is clicked
             let shuffledNames = [...horseNamePool];
             for (let i = shuffledNames.length - 1; i > 0; i--) {
                 let j = Math.floor(Math.random() * (i + 1));
@@ -449,7 +451,10 @@
                 const ownerName = player ? player.name : 'Open Lane';
                 const score = state.scores[i];
                 const progressPercent = Math.min(100, (score / FINISH_HITS) * 100);
-                const nums = state.assignedNumbers[i] ? state.assignedNumbers[i].join(', ') : '';
+                
+                const numsText = numbersRevealed && state.assignedNumbers[i] 
+                    ? state.assignedNumbers[i].join(', ') 
+                    : 'Hidden';
                 
                 const row = document.createElement('div');
                 row.className = 'track-row';
@@ -457,7 +462,7 @@
                     <div class="track-number" style="color: ${trackColors[i]}">${i}</div>
                     <div class="track-info">
                         <div class="track-owner">${ownerName}</div>
-                        <div class="assigned-nums">Nums: [${nums}]</div>
+                        <div class="assigned-nums">Nums: [${numsText}]</div>
                     </div>
                     <div class="track-lane">
                         <div class="horse-icon" style="left: ${progressPercent}%; background: ${trackColors[i]}"></div>
@@ -504,8 +509,10 @@
                 return;
             }
             const currentPlayer = state.players[state.turnIndex % state.players.length];
-            const nums = state.assignedNumbers[currentPlayer.horse] ? state.assignedNumbers[currentPlayer.horse].join(', ') : '';
-            display.innerHTML = `${currentPlayer.name}<br><span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${nums})</span>`;
+            const numsText = numbersRevealed && state.assignedNumbers[currentPlayer.horse] 
+                ? state.assignedNumbers[currentPlayer.horse].join(', ') 
+                : 'Hidden';
+            display.innerHTML = `${currentPlayer.name}<br><span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${numsText})</span>`;
         }
 
         function handleBullHit() {
@@ -554,6 +561,7 @@
                     state.players = [];
                     state.winner = null;
                     state.turnIndex = 0;
+                    numbersRevealed = false;
                     Object.keys(state.scores).forEach(k => state.scores[k] = 0);
                     document.getElementById('winnerBanner').style.display = 'none';
                     assignRandomNumbers();
@@ -581,9 +589,10 @@
             });
 
             document.getElementById('resetScoresBtn').addEventListener('click', () => {
-                if (confirm('Reset all scores and re-assign random numbers?')) {
+                if (confirm('Reset all scores, re-assign random numbers, and hide target numbers?')) {
                     Object.keys(state.scores).forEach(k => state.scores[k] = 0);
                     state.winner = null;
+                    numbersRevealed = false;
                     document.getElementById('winnerBanner').style.display = 'none';
                     assignRandomNumbers();
                     renderTracks();
