@@ -373,18 +373,7 @@
         ];
 
         let state = {
-            players: [
-                { name: "Silver Spur", horse: 1 },
-                { name: "Dart Vadar", horse: 2 },
-                { name: "Herb", horse: 3 },
-                { name: "Blazing Comet", horse: 4 },
-                { name: "Kelly", horse: 5 },
-                { name: "Iron Stallion", horse: 6 },
-                { name: "Castle Roller", horse: 7 },
-                { name: "Bulls Eye", horse: 8 },
-                { name: "Lord of the Reins", horse: 9 },
-                { name: "Royal Badass", horse: 10 }
-            ],
+            players: [],
             scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
             assignedNumbers: {},
             turnIndex: 0,
@@ -392,7 +381,8 @@
         };
 
         function assignRandomNumbers() {
-            const numbers = Array.from({ length: 20 }, (_, i) => i + 1).concat([25, 50]);
+            // Target numbers 1-20 only (20 numbers total, exactly 2 numbers per lane)
+            const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
             // Shuffle
             for (let i = numbers.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -413,19 +403,12 @@
                 [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
             }
             
+            state.players = [];
             let nameIndex = 0;
             for (let i = 1; i <= 10; i++) {
-                const existingPlayer = state.players.find(p => p.horse === i);
-                if (!existingPlayer) {
-                    while (nameIndex < shuffledNames.length && state.players.some(p => p.name === shuffledNames[nameIndex])) {
-                        nameIndex++;
-                    }
-                    if (nameIndex < shuffledNames.length) {
-                        state.players.push({ name: shuffledNames[nameIndex], horse: i });
-                        nameIndex++;
-                    }
-                } else {
-                    existingPlayer.name = shuffledNames[nameIndex++];
+                if (nameIndex < shuffledNames.length) {
+                    state.players.push({ name: shuffledNames[nameIndex], horse: i });
+                    nameIndex++;
                 }
             }
             state.winner = null;
@@ -494,6 +477,11 @@
             const list = document.getElementById('leaderboardList');
             list.innerHTML = '';
             
+            if (state.players.length === 0) {
+                list.innerHTML = '<li style="color: var(--text-muted); justify-content: center;">No active players</li>';
+                return;
+            }
+
             const sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
             sorted.forEach(p => {
                 const li = document.createElement('li');
@@ -505,7 +493,7 @@
         function renderTurn() {
             const display = document.getElementById('currentTurnDisplay');
             if (state.players.length === 0) {
-                display.innerText = "No players added.";
+                display.innerText = "No players added / Open Lanes.";
                 return;
             }
             const currentPlayer = state.players[state.turnIndex % state.players.length];
