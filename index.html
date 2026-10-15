@@ -507,31 +507,45 @@
         return;
     }
 
-    // Simulate the AI aiming at its own numbers with ~40% accuracy, or hitting any random number
-    let hitNumber = Math.floor(Math.random() * 20) + 1; 
-    const myAssignedNums = state.assignedNumbers[currentPlayer.horse] || [];
-    if (Math.random() < 0.40 && myAssignedNums.length > 0) {
-        hitNumber = myAssignedNums[Math.floor(Math.random() * myAssignedNums.length)];
-    }
+    // 5% chance to hit the Bullseye!
+    const hitBull = Math.random() < 0.05;
 
-    // Find which track(s) own this hitNumber
-    let affectedTracks = [];
-    for (let t = 1; t <= 10; t++) {
-        if (state.assignedNumbers[t] && state.assignedNumbers[t].includes(hitNumber)) {
-            affectedTracks.push(t);
-        }
-    }
-
-    if (affectedTracks.length > 0) {
-        affectedTracks.forEach(t => {
-            state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
-            if (state.scores[t] >= FINISH_HITS && !state.winner) {
-                declareWinner(t);
+    if (hitBull) {
+        // Trigger Bull hit (advances all horses +1)
+        for (let i = 1; i <= 10; i++) {
+            state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
+            if (state.scores[i] >= FINISH_HITS && !state.winner) {
+                declareWinner(i);
             }
-        });
-        lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Track(s) ${affectedTracks.join(', ')} advanced)`;
+        }
+        lastAiMessage = `Dart ${state.dartCount}: Bullseye! 🎯 (+1 to all tracks)`;
     } else {
-        lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber} (Miss / No owner)`;
+        // Simulate standard aiming: ~40% accuracy for assigned numbers, otherwise random 1-20
+        let hitNumber = Math.floor(Math.random() * 20) + 1;
+        const myAssignedNums = state.assignedNumbers[currentPlayer.horse] || [];
+        if (Math.random() < 0.40 && myAssignedNums.length > 0) {
+            hitNumber = myAssignedNums[Math.floor(Math.random() * myAssignedNums.length)];
+        }
+
+        // Find which track(s) own this hitNumber
+        let affectedTracks = [];
+        for (let t = 1; t <= 10; t++) {
+            if (state.assignedNumbers[t] && state.assignedNumbers[t].includes(hitNumber)) {
+                affectedTracks.push(t);
+            }
+        }
+
+        if (affectedTracks.length > 0) {
+            affectedTracks.forEach(t => {
+                state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
+                if (state.scores[t] >= FINISH_HITS && !state.winner) {
+                    declareWinner(t);
+                }
+            });
+            lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Track(s) ${affectedTracks.join(', ')} advanced)`;
+        } else {
+            lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber} (Miss / No owner)`;
+        }
     }
 
     renderTracks();
