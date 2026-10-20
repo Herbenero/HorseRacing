@@ -345,6 +345,7 @@
         let state = {
             players: [],
             scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
+            ownTargetHits: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
             assignedNumbers: {},
             turnIndex: 0,
             dartCount: 1,
@@ -400,7 +401,7 @@
             imgElement.src = randomImg;
             imgElement.style.display = 'inline-block';
 
-            // Build full 1st-10th final leaderboard using "Lane" terminology
+            // Build full 1st-10th final leaderboard with tie-breaking logic
             const finalLbList = document.getElementById('finalLeaderboardList');
             finalLbList.innerHTML = '';
             
@@ -412,15 +413,22 @@
                     name: p ? p.name : `Open Lane #${i}`,
                     isAI: p ? p.isAI : false,
                     score: state.scores[i],
+                    ownHits: state.ownTargetHits[i],
                     active: !!p
                 });
             }
 
-            allTracksList.sort((a, b) => b.score - a.score);
+            // Sort: Primary by score descending, secondary by own target hits descending
+            allTracksList.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return b.ownHits - a.ownHits;
+            });
 
             allTracksList.forEach((item, index) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span><strong>#${index + 1}</strong> Lane #${item.horse}: ${item.name} ${item.isAI ? '🤖' : ''}</span> <strong>${item.score} lengths</strong>`;
+                li.innerHTML = `<span><strong>#${index + 1}</strong> Lane #${item.horse}: ${item.name} ${item.isAI ? '🤖' : ''}</span> <strong>${item.score} lengths</strong> <span style="font-size: 0.8rem; color: var(--text-muted);">(Own hits: ${item.ownHits})</span>`;
                 finalLbList.appendChild(li);
             });
 
@@ -467,6 +475,11 @@
         function adjustScore(track, delta) {
             if (state.winner) return;
             state.scores[track] = Math.max(0, Math.min(FINISH_HITS, state.scores[track] + delta));
+            if (delta > 0) {
+                state.ownTargetHits[track] = Math.max(0, state.ownTargetHits[track] + 1);
+            } else if (delta < 0) {
+                state.ownTargetHits[track] = Math.max(0, state.ownTargetHits[track] - 1);
+            }
             if (state.scores[track] >= FINISH_HITS && !state.winner) {
                 declareWinner(track);
             }
@@ -480,7 +493,12 @@
                 list.innerHTML = '<li style="color: var(--text-muted); justify-content: center;">No active players</li>';
                 return;
             }
-            const sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
+            const sorted = [...state.players].sort((a, b) => {
+                if (state.scores[b.horse] !== state.scores[a.horse]) {
+                    return state.scores[b.horse] - state.scores[a.horse];
+                }
+                return state.ownTargetHits[b.horse] - state.ownTargetHits[a.horse];
+            });
             sorted.forEach(p => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>Lane #${p.horse} ${p.name} ${p.isAI ? '🤖' : ''}</span> <strong>${state.scores[p.horse]} pts</strong>`;
@@ -521,6 +539,7 @@
             if (hitBull) {
                 for (let i = 1; i <= 10; i++) {
                     state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
+                    state.ownTargetHits[i] = state.ownTargetHits[i] + 1;
                     if (state.scores[i] >= FINISH_HITS && !state.winner) { declareWinner(i); }
                 }
                 lastAiMessage = `Dart ${state.dartCount}: Bullseye! 🎯 (+1 to all tracks)`;
@@ -539,6 +558,9 @@
                 if (affectedTracks.length > 0) {
                     affectedTracks.forEach(t => {
                         state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
+                        if (t === currentPlayer.horse) {
+                            state.ownTargetHits[t] = state.ownTargetHits[t] + 1;
+                        }
                         if (state.scores[t] >= FINISH_HITS && !state.winner) { declareWinner(t); }
                     });
                     lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Lane(s) ${affectedTracks.join(', ')} advanced)`;
@@ -568,6 +590,7 @@
             if (state.winner) return;
             for (let i = 1; i <= 10; i++) {
                 state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
+                state.ownTargetHits[i] = state.ownTargetHits[i] + 1;
                 if (state.scores[i] >= FINISH_HITS && !state.winner) { declareWinner(i); }
             }
             renderTracks();
@@ -581,7 +604,10 @@
             numbersRevealed = false;
             lastAiMessage = "";
             window.aiThrowingInProgress = false;
-            Object.keys(state.scores).forEach(k => state.scores[k] = 0);
+            Object.keys(state.scores).forEach(k => {
+                state.scores[k] = 0;
+                state.ownTargetHits[k] = 0;
+            });
             
             document.getElementById('winnerScreen').style.display = 'none';
             document.getElementById('gamePlayArea').style.display = 'grid';
