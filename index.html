@@ -189,19 +189,23 @@
             padding: 0.5rem 0;
             border-bottom: 1px solid var(--border-color);
         }
-        .winner-banner {
+        .winner-screen {
             display: none;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid var(--success);
             text-align: center;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.3);
         }
-        .winner-banner img {
-            max-width: 150px;
-            border-radius: 8px;
+        .winner-screen img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
             margin-top: 1rem;
+            border: 2px solid var(--border-color);
+            object-fit: cover;
         }
     </style>
 </head>
@@ -212,16 +216,25 @@
             <p>Tracks 1–10 • Unique Random Number & Name Pool • Live Arcade Board</p>
         </header>
 
-        <div id="winnerBanner" class="winner-banner">
-            <h2 id="winnerTitle" style="margin:0; border:none;">We have a Winner!</h2>
+        <!-- Dedicated Clear Winner & Final Leaderboard Screen -->
+        <div id="winnerScreen" class="winner-screen">
+            <h2 id="winnerTitle" style="margin:0; border:none; color: var(--success); font-size: 2rem;">We have a Winner!</h2>
+            <p id="winnerSubtitle" style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.1rem;"></p>
             <img id="winnerImage" src="" alt="Winning Horse" onerror="this.style.display='none';">
+            
+            <div style="max-width: 600px; margin: 2rem auto 0 auto; text-align: left;" class="panel">
+                <h3 style="margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; text-align: center;">Final Race Standings (1st – 10th)</h3>
+                <ul id="finalLeaderboardList" class="leaderboard-list">
+                    <!-- Rendered final standings -->
+                </ul>
+            </div>
+            <button id="playAgainBtn" style="max-width: 250px; margin: 2rem auto 0 auto; background-color: var(--success); color: white;">Reset & Play Again</button>
         </div>
 
-        <div class="grid-layout">
+        <div id="gamePlayArea" class="grid-layout">
             <!-- Left Column: Controls & Setup -->
             <div class="panel">
                 <h2>Game Setup</h2>
-                
                 <div class="form-group">
                     <label for="raceLengthSelect">Race Length (Hits to Win)</label>
                     <select id="raceLengthSelect">
@@ -231,7 +244,6 @@
                         <option value="20">20 Hits (Marathon)</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="aiModeSelect">AI Players Mode</label>
                     <select id="aiModeSelect">
@@ -239,12 +251,10 @@
                         <option value="on">Add A.I. Players</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="playerName">Player Name</label>
                     <input type="text" id="playerName" placeholder="Enter racer name...">
                 </div>
-
                 <div class="form-group">
                     <label for="horseSelect">Assign Track / Horse</label>
                     <select id="horseSelect">
@@ -261,7 +271,6 @@
                         <option value="10">Lane 10</option>
                     </select>
                 </div>
-
                 <button id="addPlayerBtn">Add Player</button>
                 <button id="addAiBtn" class="secondary" style="display: none;">Add AI Racer to Open Lane</button>
                 <button id="randomizeNamesBtn" class="secondary">Randomize Horse Names</button>
@@ -323,31 +332,14 @@
             "That's My Quad", "King's Errand", "Harlett of Hellcastle"
         ];
 
-        const aiNamesPool = [
-            "Hellfire Blitz", "Dart Vadar", "Hi Bob", "The Queen's Getaway", "Papal Sidekick",
-            "The Alter Boy", "Castle Roller", "Bulls Eye", "Lord of the Reins", "Royal Badass",
-            "Thunder Hooves", "Long Live the Bitch", "Thats my Quad", "Hell to the Neigh",
-            "Storm Chaser", "Hoof & Order", "Diplomatic Immunity", "Knights' Redlar",
-            "That's My Quad", "King's Errand", "Harlett of Hellcastle"
-        ];
+        const aiNamesPool = [...horseNamePool];
 
-       const horseImagePool = [
-            "hellcastle_horse_appaloosa.png",
-            "hellcastle_horse_bay.png",
-            "hellcastle_horse_blue_roan.png",
-            "hellcastle_horse_buckskin.png",
-            "hellcastle_horse_chestnut.png",
-            "hellcastle_horse_cremello.png",
-            "hellcastle_horse_dun.png",
-            "hellcastle_horse_gray.png",
-            "hellcastle_horse_leopard.png",
-            "hellcastle_horse_paint.png",
-            "hellcastle_horse_palomino.png",
-            "hellcastle_horse_roan.png",
-            "hellcastle_horse_skewbald.png",
-            "hellcastle_horse_smoky_black.png",
-            "hellcastle_horse_white.png",
-            "Horsey1.png"
+        const horseImagePool = [
+            "hellcastle_horse_appaloosa.png", "hellcastle_horse_bay.png", "hellcastle_horse_blue_roan.png",
+            "hellcastle_horse_buckskin.png", "hellcastle_horse_chestnut.png", "hellcastle_horse_cremello.png",
+            "hellcastle_horse_dun.png", "hellcastle_horse_gray.png", "hellcastle_horse_leopard.png",
+            "hellcastle_horse_paint.png", "hellcastle_horse_palomino.png", "hellcastle_horse_roan.png",
+            "hellcastle_horse_skewbald.png", "hellcastle_horse_smoky_black.png", "hellcastle_horse_white.png", "Horsey1.png"
         ];
 
         let state = {
@@ -355,7 +347,7 @@
             scores: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
             assignedNumbers: {},
             turnIndex: 0,
-            dartCount: 1, // Tracks current dart (1, 2, or 3)
+            dartCount: 1,
             winner: null
         };
 
@@ -376,7 +368,7 @@
             let shuffledNames = [...horseNamePool];
             const existingNames = new Set(state.players.map(p => p.name));
             shuffledNames = shuffledNames.filter(name => !existingNames.has(name));
-            
+
             for (let i = shuffledNames.length - 1; i > 0; i--) {
                 let j = Math.floor(Math.random() * (i + 1));
                 [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
@@ -399,19 +391,50 @@
             state.winner = trackNum;
             const player = state.players.find(p => p.horse === trackNum);
             const winnerName = player ? `Track ${trackNum} (${player.name})` : `Track ${trackNum}`;
-            document.getElementById('winnerTitle').innerText = `${winnerName} ${reasonText}`;
+            
+            document.getElementById('winnerTitle').innerText = `${winnerName} wins!`;
+            document.getElementById('winnerSubtitle').innerText = reasonText;
             
             const randomImg = horseImagePool[Math.floor(Math.random() * horseImagePool.length)];
             const imgElement = document.getElementById('winnerImage');
             imgElement.src = randomImg;
-            imgElement.style.display = 'block';
+            imgElement.style.display = 'inline-block';
+
+            // Build full 1st-10th final leaderboard
+            const finalLbList = document.getElementById('finalLeaderboardList');
+            finalLbList.innerHTML = '';
             
-            document.getElementById('winnerBanner').style.display = 'block';
+            // Gather all 10 tracks, mapping registered players or labeling unassigned open lanes
+            let allTracksList = [];
+            for (let i = 1; i <= 10; i++) {
+                const p = state.players.find(x => x.horse === i);
+                allTracksList.push({
+                    horse: i,
+                    name: p ? p.name : `Open Lane #${i}`,
+                    isAI: p ? p.isAI : false,
+                    score: state.scores[i],
+                    active: !!p
+                });
+            }
+
+            // Sort descending by score completed
+            allTracksList.sort((a, b) => b.score - a.score);
+
+            allTracksList.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span><strong>#${index + 1}</strong> Track #${item.horse}: ${item.name} ${item.isAI ? '🤖' : ''}</span> <strong>${item.score} lengths</strong>`;
+                finalLbList.appendChild(li);
+            });
+
+            // Hide normal gameplay grid and show winner screen
+            document.getElementById('gamePlayArea').style.display = 'none';
+            document.getElementById('winnerScreen').style.display = 'block';
         }
 
         function renderTracks() {
             const container = document.getElementById('tracks');
             container.innerHTML = '';
+
             for (let i = 1; i <= 10; i++) {
                 const player = state.players.find(p => p.horse === i);
                 const ownerName = player ? `${player.name} ${player.isAI ? '🤖' : ''}` : 'Open Lane';
@@ -478,18 +501,14 @@
             }
             const currentPlayer = state.players[state.turnIndex % state.players.length];
             const numsText = numbersRevealed && state.assignedNumbers[currentPlayer.horse] ? state.assignedNumbers[currentPlayer.horse].join(', ') : 'Hidden';
-            
             let html = `${currentPlayer.name} ${currentPlayer.isAI ? '🤖 (AI)' : ''}<br>` +
-                `<span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${numsText})</span><br>` +
-                `<span style="font-size:0.9rem; color:var(--accent);">Dart Throw: ${state.dartCount} of 3</span>`;
-
+                       `<span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${numsText})</span><br>` +
+                       `<span style="font-size:0.9rem; color:var(--accent);">Dart Throw: ${state.dartCount} of 3</span>`;
             if (currentPlayer.isAI && lastAiMessage) {
                 html += `<br><span style="font-size:0.8rem; color:var(--success);">${lastAiMessage}</span>`;
             }
-
             display.innerHTML = html;
 
-            // If AI's turn, trigger sequential 3-dart throws
             if (currentPlayer.isAI && !state.winner && !window.aiThrowingInProgress) {
                 window.aiThrowingInProgress = true;
                 setTimeout(handleAIDartThrow, 900);
@@ -497,87 +516,80 @@
         }
 
         function handleAIDartThrow() {
-    if (state.winner) {
-        window.aiThrowingInProgress = false;
-        return;
-    }
-    const currentPlayer = state.players[state.turnIndex % state.players.length];
-    if (!currentPlayer || !currentPlayer.isAI) {
-        window.aiThrowingInProgress = false;
-        return;
-    }
+            if (state.winner) { window.aiThrowingInProgress = false; return; }
+            const currentPlayer = state.players[state.turnIndex % state.players.length];
+            if (!currentPlayer || !currentPlayer.isAI) { window.aiThrowingInProgress = false; return; }
 
-    // 5% chance to hit the Bullseye!
-    const hitBull = Math.random() < 0.05;
-
-    if (hitBull) {
-        // Trigger Bull hit (advances all horses +1)
-        for (let i = 1; i <= 10; i++) {
-            state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
-            if (state.scores[i] >= FINISH_HITS && !state.winner) {
-                declareWinner(i);
-            }
-        }
-        lastAiMessage = `Dart ${state.dartCount}: Bullseye! 🎯 (+1 to all tracks)`;
-    } else {
-        // Simulate standard aiming: ~40% accuracy for assigned numbers, otherwise random 1-20
-        let hitNumber = Math.floor(Math.random() * 20) + 1;
-        const myAssignedNums = state.assignedNumbers[currentPlayer.horse] || [];
-        if (Math.random() < 0.40 && myAssignedNums.length > 0) {
-            hitNumber = myAssignedNums[Math.floor(Math.random() * myAssignedNums.length)];
-        }
-
-        // Find which track(s) own this hitNumber
-        let affectedTracks = [];
-        for (let t = 1; t <= 10; t++) {
-            if (state.assignedNumbers[t] && state.assignedNumbers[t].includes(hitNumber)) {
-                affectedTracks.push(t);
-            }
-        }
-
-        if (affectedTracks.length > 0) {
-            affectedTracks.forEach(t => {
-                state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
-                if (state.scores[t] >= FINISH_HITS && !state.winner) {
-                    declareWinner(t);
+            const hitBull = Math.random() < 0.05;
+            if (hitBull) {
+                for (let i = 1; i <= 10; i++) {
+                    state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
+                    if (state.scores[i] >= FINISH_HITS && !state.winner) { declareWinner(i); }
                 }
-            });
-            lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Track(s) ${affectedTracks.join(', ')} advanced)`;
-        } else {
-            lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber} (Miss / No owner)`;
+                lastAiMessage = `Dart ${state.dartCount}: Bullseye! 🎯 (+1 to all tracks)`;
+            } else {
+                let hitNumber = Math.floor(Math.random() * 20) + 1;
+                const myAssignedNums = state.assignedNumbers[currentPlayer.horse] || [];
+                if (Math.random() < 0.40 && myAssignedNums.length > 0) {
+                    hitNumber = myAssignedNums[Math.floor(Math.random() * myAssignedNums.length)];
+                }
+                let affectedTracks = [];
+                for (let t = 1; t <= 10; t++) {
+                    if (state.assignedNumbers[t] && state.assignedNumbers[t].includes(hitNumber)) {
+                        affectedTracks.push(t);
+                    }
+                }
+                if (affectedTracks.length > 0) {
+                    affectedTracks.forEach(t => {
+                        state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
+                        if (state.scores[t] >= FINISH_HITS && !state.winner) { declareWinner(t); }
+                    });
+                    lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Track(s) ${affectedTracks.join(', ')} advanced)`;
+                } else {
+                    lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber} (Miss / No owner)`;
+                }
+            }
+
+            renderTracks();
+            if (state.winner) { window.aiThrowingInProgress = false; return; }
+
+            if (state.dartCount < 3) {
+                state.dartCount++;
+                setTimeout(handleAIDartThrow, 900);
+            } else {
+                setTimeout(() => {
+                    state.dartCount = 1;
+                    state.turnIndex++;
+                    lastAiMessage = "";
+                    window.aiThrowingInProgress = false;
+                    renderTurn();
+                }, 1200);
+            }
         }
-    }
 
-    renderTracks();
-
-    if (state.winner) {
-        window.aiThrowingInProgress = false;
-        return;
-    }
-
-    // If we haven't thrown 3 darts yet, throw the next dart after a pause
-    if (state.dartCount < 3) {
-        state.dartCount++;
-        setTimeout(handleAIDartThrow, 900);
-    } else {
-        // Finished all 3 darts! Wait a moment so the player can see the 3rd throw result, then switch turns.
-        setTimeout(() => {
-            state.dartCount = 1;
-            state.turnIndex++;
-            lastAiMessage = "";
-            window.aiThrowingInProgress = false;
-            renderTurn();
-        }, 1200);
-    }
-}
         function handleBullHit() {
             if (state.winner) return;
             for (let i = 1; i <= 10; i++) {
                 state.scores[i] = Math.min(FINISH_HITS, state.scores[i] + 1);
-                if (state.scores[i] >= FINISH_HITS && !state.winner) {
-                    declareWinner(i);
-                }
+                if (state.scores[i] >= FINISH_HITS && !state.winner) { declareWinner(i); }
             }
+            renderTracks();
+        }
+
+        function resetGame() {
+            state.players = [];
+            state.winner = null;
+            state.turnIndex = 0;
+            state.dartCount = 1;
+            numbersRevealed = false;
+            lastAiMessage = "";
+            window.aiThrowingInProgress = false;
+            Object.keys(state.scores).forEach(k => state.scores[k] = 0);
+            
+            document.getElementById('winnerScreen').style.display = 'none';
+            document.getElementById('gamePlayArea').style.display = 'grid';
+            
+            assignRandomNumbers();
             renderTracks();
         }
 
@@ -586,12 +598,10 @@
                 FINISH_HITS = parseInt(e.target.value);
                 renderTracks();
             });
-
             document.getElementById('aiModeSelect').addEventListener('change', (e) => {
                 aiMode = e.target.value === 'on';
                 const addAiBtn = document.getElementById('addAiBtn');
                 const playerNameInput = document.getElementById('playerName');
-                
                 if (aiMode) {
                     addAiBtn.style.display = 'block';
                     playerNameInput.placeholder = "Enter human racer name...";
@@ -600,13 +610,11 @@
                     playerNameInput.placeholder = "Enter racer name...";
                 }
             });
-
             document.getElementById('addPlayerBtn').addEventListener('click', () => {
                 const nameInput = document.getElementById('playerName');
                 const horseSelect = document.getElementById('horseSelect');
                 const name = nameInput.value.trim();
                 const horse = parseInt(horseSelect.value);
-
                 if (!name || isNaN(horse)) {
                     alert('Please enter a player name and select a valid track (1-10).');
                     return;
@@ -615,13 +623,11 @@
                     alert('This track is already taken by another player.');
                     return;
                 }
-
                 state.players.push({ name, horse, isAI: false });
                 nameInput.value = '';
                 horseSelect.value = '';
                 renderTracks();
             });
-
             document.getElementById('addAiBtn').addEventListener('click', () => {
                 let availableTrack = null;
                 for (let i = 1; i <= 10; i++) {
@@ -630,43 +636,23 @@
                         break;
                     }
                 }
-
                 if (!availableTrack) {
                     alert('All 10 tracks are currently taken!');
                     return;
                 }
-
                 const existingNames = new Set(state.players.map(p => p.name));
                 const availableAiNames = aiNamesPool.filter(n => !existingNames.has(n));
                 const aiName = availableAiNames.length > 0 ? availableAiNames[Math.floor(Math.random() * availableAiNames.length)] : `AI Racer #${availableTrack}`;
-
-                state.players.push({
-                    name: aiName,
-                    horse: availableTrack,
-                    isAI: true
-                });
-
+                state.players.push({ name: aiName, horse: availableTrack, isAI: true });
                 renderTracks();
             });
-
             document.getElementById('randomizeNamesBtn').addEventListener('click', assignRandomHorseNames);
-
             document.getElementById('clearPlayersBtn').addEventListener('click', () => {
                 if (confirm('Clear all players and reset scores?')) {
-                    state.players = [];
-                    state.winner = null;
-                    state.turnIndex = 0;
-                    state.dartCount = 1;
-                    numbersRevealed = false;
-                    lastAiMessage = "";
-                    window.aiThrowingInProgress = false;
-                    Object.keys(state.scores).forEach(k => state.scores[k] = 0);
-                    document.getElementById('winnerBanner').style.display = 'none';
-                    assignRandomNumbers();
-                    renderTracks();
+                    resetGame();
                 }
             });
-
+            document.getElementById('playAgainBtn').addEventListener('click', resetGame);
             document.getElementById('nextTurnBtn').addEventListener('click', () => {
                 if (state.players.length > 0 && !window.aiThrowingInProgress) {
                     state.dartCount++;
@@ -677,7 +663,6 @@
                     renderTurn();
                 }
             });
-
             document.getElementById('checkWinnerBtn').addEventListener('click', () => {
                 let maxScore = -1;
                 let leader = null;
@@ -689,25 +674,14 @@
                 }
                 alert(`Current leader is Track #${leader} with ${maxScore} hits!`);
             });
-
             document.getElementById('resetScoresBtn').addEventListener('click', () => {
                 if (confirm('Reset all scores, re-assign random numbers, and hide target numbers?')) {
-                    Object.keys(state.scores).forEach(k => state.scores[k] = 0);
-                    state.winner = null;
-                    state.dartCount = 1;
-                    numbersRevealed = false;
-                    lastAiMessage = "";
-                    window.aiThrowingInProgress = false;
-                    document.getElementById('winnerBanner').style.display = 'none';
-                    assignRandomNumbers();
-                    renderTracks();
+                    resetGame();
                 }
             });
-
             document.getElementById('bullBtn').addEventListener('click', handleBullHit);
         }
 
-        // Initialize App on Load
         window.addEventListener('DOMContentLoaded', () => {
             assignRandomNumbers();
             renderTracks();
