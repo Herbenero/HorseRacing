@@ -238,10 +238,10 @@
                 <div class="form-group">
                     <label for="raceLengthSelect">Race Length (Hits to Win)</label>
                     <select id="raceLengthSelect">
-                        <option value="5">5 Hits (Sprint)</option>
-                        <option value="10" selected>10 Hits (Standard)</option>
-                        <option value="15">15 Hits (Long)</option>
-                        <option value="20">20 Hits (Marathon)</option>
+                        <option value="5">5 Lengths</option>
+                        <option value="10" selected>10 Lengths</option>
+                        <option value="20">20 Lengths</option>
+                        <option value="25">25 Lengths</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -390,7 +390,7 @@
             if (state.winner) return;
             state.winner = trackNum;
             const player = state.players.find(p => p.horse === trackNum);
-            const winnerName = player ? `Track ${trackNum} (${player.name})` : `Track ${trackNum}`;
+            const winnerName = player ? `Lane ${trackNum} (${player.name})` : `Lane ${trackNum}`;
             
             document.getElementById('winnerTitle').innerText = `${winnerName} wins!`;
             document.getElementById('winnerSubtitle').innerText = reasonText;
@@ -400,11 +400,10 @@
             imgElement.src = randomImg;
             imgElement.style.display = 'inline-block';
 
-            // Build full 1st-10th final leaderboard
+            // Build full 1st-10th final leaderboard using "Lane" terminology
             const finalLbList = document.getElementById('finalLeaderboardList');
             finalLbList.innerHTML = '';
             
-            // Gather all 10 tracks, mapping registered players or labeling unassigned open lanes
             let allTracksList = [];
             for (let i = 1; i <= 10; i++) {
                 const p = state.players.find(x => x.horse === i);
@@ -417,16 +416,14 @@
                 });
             }
 
-            // Sort descending by score completed
             allTracksList.sort((a, b) => b.score - a.score);
 
             allTracksList.forEach((item, index) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span><strong>#${index + 1}</strong> Track #${item.horse}: ${item.name} ${item.isAI ? '🤖' : ''}</span> <strong>${item.score} lengths</strong>`;
+                li.innerHTML = `<span><strong>#${index + 1}</strong> Lane #${item.horse}: ${item.name} ${item.isAI ? '🤖' : ''}</span> <strong>${item.score} lengths</strong>`;
                 finalLbList.appendChild(li);
             });
 
-            // Hide normal gameplay grid and show winner screen
             document.getElementById('gamePlayArea').style.display = 'none';
             document.getElementById('winnerScreen').style.display = 'block';
         }
@@ -486,7 +483,7 @@
             const sorted = [...state.players].sort((a, b) => state.scores[b.horse] - state.scores[a.horse]);
             sorted.forEach(p => {
                 const li = document.createElement('li');
-                li.innerHTML = `<span>#${p.horse} ${p.name} ${p.isAI ? '🤖' : ''}</span> <strong>${state.scores[p.horse]} pts</strong>`;
+                li.innerHTML = `<span>Lane #${p.horse} ${p.name} ${p.isAI ? '🤖' : ''}</span> <strong>${state.scores[p.horse]} pts</strong>`;
                 list.appendChild(li);
             });
         }
@@ -502,7 +499,7 @@
             const currentPlayer = state.players[state.turnIndex % state.players.length];
             const numsText = numbersRevealed && state.assignedNumbers[currentPlayer.horse] ? state.assignedNumbers[currentPlayer.horse].join(', ') : 'Hidden';
             let html = `${currentPlayer.name} ${currentPlayer.isAI ? '🤖 (AI)' : ''}<br>` +
-                       `<span style="font-size:0.85rem; color:var(--text-muted);">Riding Track #${currentPlayer.horse} (Numbers: ${numsText})</span><br>` +
+                       `<span style="font-size:0.85rem; color:var(--text-muted);">Riding Lane #${currentPlayer.horse} (Numbers: ${numsText})</span><br>` +
                        `<span style="font-size:0.9rem; color:var(--accent);">Dart Throw: ${state.dartCount} of 3</span>`;
             if (currentPlayer.isAI && lastAiMessage) {
                 html += `<br><span style="font-size:0.8rem; color:var(--success);">${lastAiMessage}</span>`;
@@ -544,7 +541,7 @@
                         state.scores[t] = Math.max(0, Math.min(FINISH_HITS, state.scores[t] + 1));
                         if (state.scores[t] >= FINISH_HITS && !state.winner) { declareWinner(t); }
                     });
-                    lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Track(s) ${affectedTracks.join(', ')} advanced)`;
+                    lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber}! (Lane(s) ${affectedTracks.join(', ')} advanced)`;
                 } else {
                     lastAiMessage = `Dart ${state.dartCount}: Hit #${hitNumber} (Miss / No owner)`;
                 }
@@ -672,7 +669,7 @@
                         leader = i;
                     }
                 }
-                alert(`Current leader is Track #${leader} with ${maxScore} hits!`);
+                alert(`Current leader is Lane #${leader} with ${maxScore} hits!`);
             });
             document.getElementById('resetScoresBtn').addEventListener('click', () => {
                 if (confirm('Reset all scores, re-assign random numbers, and hide target numbers?')) {
